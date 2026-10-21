@@ -3,7 +3,7 @@
 **AI-Assisted Product Developer · Full-stack SaaS, LLM features & Stripe integrations**
 Malmö, Sweden · Open to junior roles in AI product development, automation and full-stack web development
 
-For almost a year I have been building software products with Claude Code as my main development tool, taking ideas from an empty folder to deployed apps with sign-up, a database, payments and third-party integrations. Most of what I build sits where AI meets an everyday business problem: a support assistant that answers from a company's own content, AI-drafted responses to Stripe disputes, and subscription tools that act directly on a customer's Stripe account.
+For almost a year I have been building software products with Claude Code as my main development tool, taking ideas from an empty folder to deployed web apps and App Store releases with databases, payments and third-party integrations. Most of what I build sits where AI meets an everyday business problem: a support assistant that answers from a company's own content, AI-drafted responses to Stripe disputes, and subscription tools that act directly on a customer's Stripe account. On iOS, I have published apps that analyse chart images with an AI vision model and count push-ups with on-device pose detection.
 
 The products below are live. Their source code is private, and I'm happy to walk through how any of them works.
 
@@ -52,22 +52,54 @@ A hosted cancellation page for SaaS companies that bill through Stripe. When a c
 - **Built in iterations:** grew out of several earlier versions since May 2026, first released as CancelPause.
 - **Stack:** TypeScript · Next.js · Supabase · Stripe Connect · Resend · Zod · Vitest
 
-### Step N Scroll — iOS screen-time app
+---
+
+## iOS apps on the App Store
+
+### ChartLens AI — chart analysis and trading journal
+**[App Store](https://apps.apple.com/app/id6760035524)**
+
+An iPhone and iPad app for newer traders who want structured feedback on their setups. They photograph or upload a price chart, get an AI analysis they can ask follow-up questions about, and keep a trade journal with AI-written reviews. It is built for learning, not as financial advice.
+
+- **Problem:** newer traders often can't tell why a setup worked or failed, and rarely review their trades consistently.
+- **Under the hood:**
+  - The app sends the chart image, with the trader's chosen strategy and timeframe, to a Node.js backend on Railway. The backend calls OpenAI's Responses API with image input and parses the structured result before returning it.
+  - A follow-up chat about each analysis, plus AI journal reviews (summary, strengths, weaknesses, one improvement tip) returned as JSON.
+  - A push-notification service on APNs (HTTP/2 with token authentication), backed by an SQLite scheduler for streaks, inactivity reminders and timezone-aware weekly summaries.
+  - Subscriptions through RevenueCat, synced to the backend, and a lessons section whose curriculum is served by the backend.
+- **Stack:** Swift · SwiftUI · Node.js · Express · SQLite · OpenAI API (vision) · APNs · RevenueCat · Railway
+
+### PushUp Rivals — push-up game with on-device pose tracking
+**[App Store](https://apps.apple.com/app/id6782373587)**
+
+A fitness game where push-ups are the controller. The camera counts each rep, and every rep deals damage to enemies across campaign levels, boss battles and an endless horde mode.
+
+- **Problem:** home workouts get repetitive and are easy to skip.
+- **Under the hood:**
+  - Real-time body-pose detection with Apple's Vision framework on live camera frames, processed on a background queue that drops late frames to stay responsive.
+  - Rep counting from the elbow angle (shoulder, elbow, wrist), smoothed across frames, with a down/up movement state machine, a body-alignment check and a cooldown against double counts.
+  - A battle engine that turns reps into damage, plus haptic feedback and RevenueCat subscriptions.
+  - 23 XCTest unit tests covering the angle maths, the rep counter and the battle engine. Everything runs on the device; the app has no backend.
+- **Stack:** Swift · SwiftUI · Vision · AVFoundation · Core Haptics · RevenueCat · XCTest
+
+### Step N Scroll — screen-time app
 **[App Store](https://apps.apple.com/app/id6757087994)**
 
 An iPhone app that keeps distracting apps locked until you have walked enough, with an optional AI "future self" scan.
 
+- **Problem:** it is easy to lose hours to scrolling instead of moving.
 - **Under the hood:**
   - Apple's Screen Time APIs (FamilyControls, ManagedSettings) to block and unlock apps, with step data from HealthKit and Core Motion.
   - Subscriptions through RevenueCat, with per-tier scan limits enforced on the server.
   - A TypeScript backend (Fastify, Supabase Postgres and Storage) that runs OpenAI image generation as background jobs.
 - **Stack:** Swift · SwiftUI · HealthKit · Screen Time APIs · RevenueCat · Fastify · Supabase · OpenAI API
 
-### Also built
+---
+
+## More projects
 
 - **[Capnivo](https://www.capnivo.io)**: AI captions for short-form video, with Whisper transcription, Gemini-based clip selection and an ffmpeg render worker.
 - **[Retriq](https://www.retriq.io)**: failed-payment recovery packaged as a Stripe App, with OAuth, encrypted token storage and automated recovery emails.
-- **Push-Up Rivals**: an iOS fitness game that counts push-ups with on-device body-pose detection (Apple Vision).
 
 ---
 
@@ -81,8 +113,8 @@ An iPhone app that keeps distracting apps locked until you have walked enough, w
 - Vitest, Git and GitHub, deploying on Vercel
 
 **Have also used**
-- Swift and SwiftUI (HealthKit, Screen Time APIs, Vision), RevenueCat
-- Fastify and Express backends, Resend, ffmpeg
+- Swift and SwiftUI (Vision, AVFoundation, HealthKit, Screen Time APIs), RevenueCat, APNs push notifications
+- Node.js backends with Express and Fastify, SQLite, Resend, ffmpeg
 - Flutter and Dart
 
 **AI development tools:** Claude Code (primary), Cursor
